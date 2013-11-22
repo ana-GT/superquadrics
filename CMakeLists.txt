@@ -1,12 +1,21 @@
+##########################
+# CMake file
+##########################
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 project(superquadrics_visualize)
 
+
+# Required:
+# PCL > 1.7 
+# Eigen ( works with 3.2 )
+# Boost (works with 1.48 - NO 1.46 )
 find_package(PCL 1.7 REQUIRED io common segmentation sample_consensus surface visualization)
 include_directories(${PCL_INCLUDE_DIRS} include/)
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
+# External library CERES
 find_package (Ceres REQUIRED)
 include_directories (${CERES_INCLUDES})
 
@@ -17,62 +26,78 @@ if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
+# Include files for framework_incs
 set (framework_incs include/fit_superquadric_lm.h 
-					include/fit_superquadric_ceres.h
-                    include/superquadric_formulas.h
-                    include/sample_superquadric.h
-                    include/sample_superquadric_uniform.h
-                    include/segmentation_utils.h
-                    include/tabletop_segmentation.h
-                    include/superquadric_detection.h
-                    include/superquadric_rigid_registration.h)
+  include/fit_superquadric_ceres.h
+  include/superquadric_formulas.h
+  include/sample_superquadric.h
+  include/sample_superquadric_uniform.h
+  include/segmentation_utils.h
+  include/tabletop_segmentation.h
+  include/superquadric_detection.h
+  include/superquadric_rigid_registration.h)
+# Include file for framework_impls
 set (framework_impls include/impl/fit_superquadric_lm.hpp
-					 include/impl/fit_superquadric_ceres.hpp
-					 include/impl/superquadric_formulas.hpp
-                     include/impl/sample_superquadric.hpp
-                     include/impl/sample_superquadric_uniform.hpp
-                     include/impl/segmentation_utils.hpp
-                     include/impl/tabletop_segmentation.hpp
-                     include/impl/superquadric_detection.hpp
-                     include/impl/superquadric_rigid_registration.hpp)
+  include/impl/fit_superquadric_ceres.hpp
+  include/impl/superquadric_formulas.hpp
+  include/impl/sample_superquadric.hpp
+  include/impl/sample_superquadric_uniform.hpp
+  include/impl/segmentation_utils.hpp
+  include/impl/tabletop_segmentation.hpp
+  include/impl/superquadric_detection.hpp
+  include/impl/superquadric_rigid_registration.hpp)
+# Include file for framework_srcs
 set (framework_srcs src/fit_superquadric_lm.cpp
-                    src/fit_superquadric_ceres.cpp
-                    src/sample_superquadric.cpp
-                    src/sample_superquadric_uniform.cpp
-                    src/segmentation_utils.cpp
-                    src/tabletop_segmentation.cpp
-                    src/superquadric_detection.cpp
-                    src/superquadric_rigid_registration.cpp)
+  src/fit_superquadric_ceres.cpp
+  src/sample_superquadric.cpp
+  src/sample_superquadric_uniform.cpp
+  src/segmentation_utils.cpp
+  src/tabletop_segmentation.cpp
+  src/superquadric_detection.cpp
+  src/superquadric_rigid_registration.cpp)
 
+
+# Superquadrics Framework
 ADD_LIBRARY (superquadrics_framework ${framework_incs} ${framework_impls} ${framework_srcs})
 TARGET_LINK_LIBRARIES (superquadrics_framework)
 
-set (libs_to_link ${PCL_LIBRARIES} ${CERES_LIBRARIES} superquadrics_framework)
+# Set libraries on which the rest of executables will depend
+set (libs_to_link ${PCL_LIBRARIES} ${CERES_LIBRARIES} superquadrics_framework )
 
 
+####################
+# EXECUTABLES
+####################
 
+# Sample superquadric VTK
 add_executable (sample_superquadric_vtk MACOSX_BUNDLE src/main_sample_superquadric_vtk.cpp)
 target_link_libraries (sample_superquadric_vtk ${PCL_LIBRARIES})
 
+# Sample superquadric
 add_executable (sample_superquadric src/main_sample_superquadric.cpp)
 target_link_libraries (sample_superquadric ${libs_to_link})
 
+# Fit superquadric to samples
 add_executable (fit_superquadric_to_samples MACOSX_BUNDLE src/main_fit_superquadric_to_samples.cpp)
 target_link_libraries (fit_superquadric_to_samples ${PCL_LIBRARIES} superquadrics_framework)
 
-
+# Split and merge superquadric
 add_executable (split_and_merge MACOSX_BUNDLE src/main_split_and_merge.cpp)
 target_link_libraries (split_and_merge ${libs_to_link})
 
+# Fit superquadric with CERES
 add_executable (fit_superquadric_ceres src/main_fit_superquadric_ceres.cpp)
 target_link_libraries (fit_superquadric_ceres ${libs_to_link})
 
+# Table top segmentation
 add_executable (tabletop_segmentation MACOSX_BUNDLE src/main_tabletop_segmentation.cpp)
 target_link_libraries (tabletop_segmentation ${libs_to_link})
 
+# Segmentation with n pointclouds?
 add_executable (segmentation_n_fitting_pipeline MACOSX_BUNDLE src/main_segmentation_n_fitting_pipeline.cpp)
 target_link_libraries (segmentation_n_fitting_pipeline ${libs_to_link})
 
+# Segmentation with n detection
 add_executable (segmentation_n_detection MACOSX_BUNDLE src/main_segmentation_n_detection.cpp)
 target_link_libraries (segmentation_n_detection ${libs_to_link})
 
