@@ -60,7 +60,8 @@ set (framework_srcs src/fit_superquadric_lm.cpp
 # Superquadrics Framework
 ADD_LIBRARY (superquadrics_framework ${framework_incs} ${framework_impls} ${framework_srcs})
 TARGET_LINK_LIBRARIES (superquadrics_framework)
-
+SET_TARGET_PROPERTIES( superquadrics_framework PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib
+  ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib )
 # Set libraries on which the rest of executables will depend
 set (libs_to_link ${PCL_LIBRARIES} ${CERES_LIBRARIES} superquadrics_framework )
 
@@ -68,39 +69,5 @@ set (libs_to_link ${PCL_LIBRARIES} ${CERES_LIBRARIES} superquadrics_framework )
 ####################
 # EXECUTABLES
 ####################
-
-# Sample superquadric VTK
-add_executable (sample_superquadric_vtk MACOSX_BUNDLE src/main_sample_superquadric_vtk.cpp)
-target_link_libraries (sample_superquadric_vtk ${PCL_LIBRARIES})
-
-# Sample superquadric
-add_executable (sample_superquadric src/main_sample_superquadric.cpp)
-target_link_libraries (sample_superquadric ${libs_to_link})
-
-# Fit superquadric to samples
-add_executable (fit_superquadric_to_samples MACOSX_BUNDLE src/main_fit_superquadric_to_samples.cpp)
-target_link_libraries (fit_superquadric_to_samples ${PCL_LIBRARIES} superquadrics_framework)
-
-# Split and merge superquadric
-add_executable (split_and_merge MACOSX_BUNDLE src/main_split_and_merge.cpp)
-target_link_libraries (split_and_merge ${libs_to_link})
-
-# Fit superquadric with CERES
-add_executable (fit_superquadric_ceres src/main_fit_superquadric_ceres.cpp)
-target_link_libraries (fit_superquadric_ceres ${libs_to_link})
-
-# Table top segmentation
-add_executable (tabletop_segmentation MACOSX_BUNDLE src/main_tabletop_segmentation.cpp)
-target_link_libraries (tabletop_segmentation ${libs_to_link})
-
-# Segmentation with n pointclouds?
-add_executable (segmentation_n_fitting_pipeline MACOSX_BUNDLE src/main_segmentation_n_fitting_pipeline.cpp)
-target_link_libraries (segmentation_n_fitting_pipeline ${libs_to_link})
-
-# Segmentation with n detection
-add_executable (segmentation_n_detection MACOSX_BUNDLE src/main_segmentation_n_detection.cpp)
-target_link_libraries (segmentation_n_detection ${libs_to_link})
-
-
-add_executable (tests src/main_tests.cpp)
-target_link_libraries (tests ${libs_to_link})
+add_subdirectory( executables )
+add_subdirectory( tests )
